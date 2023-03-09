@@ -126,10 +126,12 @@ def calcTaskOrigin(taskTimeMat: np.array, carInfo: np.array):
 
 
 def calcQOE(taskTime: float, taskOriginTime: float, taskEnergy: float, taskOriginEnergy: float, BMat: np.array):
+
     if taskOriginTime - taskTime>0:
         return BMat[0] * ((taskOriginTime - taskTime) / taskOriginTime) + BMat[1] * (
             (taskOriginEnergy - taskEnergy) / taskOriginEnergy)
     else:
+        # print("in")
         return -10000000
 
 

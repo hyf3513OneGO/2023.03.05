@@ -27,8 +27,8 @@ class MyProblem(ea.Problem):  # 继承Problem父类
         self.resourceMats = resourceMats
         self.carInfos = carInfos
         self.MECInfo = MECInfos
-        self.Parallel =True
-        self.pm=0.7
+        self.Parallel = True
+        self.pm = 0.7
         self.B = B
         # 调用父类构造方法完成实例化
         ea.Problem.__init__(self, name, M, maxormins, Dim, varTypes, lb, ub, lbin, ubin)
@@ -37,17 +37,26 @@ class MyProblem(ea.Problem):  # 继承Problem父类
         Chrom = pop.Chrom  # 获取决策变量矩阵，它等于种群的表现型矩阵Phen
         cvList = []
         QOElist = []
+        taskTimeTotalList = []
         for idx, item in enumerate(Chrom):
-            cvList.append([0])
+
             decisionMat, _ = geatVars2mat(Chrom[idx], self.taskTimeMats)
-            taskTimeTotal, taskEnergyTotal, transferTimeTotal, QOETotal,taskTimeOriginTotal,taskEnergyOriginTotal = calcTasks(self.taskTimeMats,
-                                                                                    self.taskDataMats,
-                                                                                    decisionMat, self.resourceMats,
-                                                                                    self.carInfos, self.MECInfo, self.B)
+            taskTimeTotal, taskEnergyTotal, transferTimeTotal, QOETotal, taskTimeOriginTotal, taskEnergyOriginTotal = calcTasks(
+                self.taskTimeMats,
+                self.taskDataMats,
+                decisionMat, self.resourceMats,
+                self.carInfos, self.MECInfo, self.B)
+            if taskTimeOriginTotal < taskTimeTotal:
+                cvList.append([10000])
+            else:
+                cvList.append([0])
             # print(taskTimeTotal,QOETotal)
+            # print(QOETotal)
             QOElist.append([QOETotal])
+            taskTimeTotalList.append([taskTimeTotal])
         pop.CV = np.stack(cvList)
-        pop.ObjV = np.stack(QOElist)
+        # pop.ObjV = np.stack(QOElist)
+        pop.ObjV = np.stack(taskTimeTotalList)
         # print(pop.FitnV)
         # print(pop.ObjV)
         # print(pop.CV)
@@ -59,11 +68,11 @@ def gaResolve_class_decision(taskTimeMats, tasksDataMats, decisionMat, ResourceM
     problem = MyProblem(taskTimeMats, tasksDataMats, decisionMat, ResourceMats, CarInfos, MECInfo, B)
     # 构建算法
     algorithm = ea.soea_GGAP_SGA_templet(problem,
-                                            ea.Population(Encoding='RI', NIND=50),
-                                            MAXGEN=15,  # 最大进化代数
-                                            logTras=1)  # 表示每隔多少代记录一次日志信息，0表示不记录。
+                                         ea.Population(Encoding='RI', NIND=20),
+                                         MAXGEN=10,  # 最大进化代数
+                                         logTras=1)  # 表示每隔多少代记录一次日志信息，0表示不记录。
     # 求解
     res = ea.optimize(algorithm, seed=1, verbose=False, drawing=0, outputMsg=False, drawLog=False, saveFlag=False,
                       dirName='result')
-    decisionMatResult,_ = geatVars2mat(np.squeeze(res['Vars']), taskTimeMats)
+    decisionMatResult, _ = geatVars2mat(np.squeeze(res['Vars']), taskTimeMats)
     return decisionMatResult

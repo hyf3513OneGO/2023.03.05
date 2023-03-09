@@ -1,7 +1,7 @@
 import time
 
 from matplotlib import pyplot as plt
-from sko.PSO import PSO
+from sko.IA import IA_TSP
 import numpy as np
 
 # decisionMat不是决策变量的矩阵而是子任务的矩阵
@@ -46,6 +46,8 @@ class MyProblem:
             self.decisionsMats, decisionMat,
             self.carInfos, self.MECInfo, self.B)
         self.taskTimeOriginTotal = taskTimeOriginTotal
+        if taskEnergyTotal / taskEnergyOriginTotal > 2:
+            return 1000000
         return -QOETotal
 
     def checkTimeOpT(self, Chrom):
@@ -64,17 +66,16 @@ class MyProblem:
         ub = [10 for _ in range(lenV)]  # 决策变量上界
         # lbin = [1 for _ in range(lenV)]  # 决策变量下边界（0表示不包含该变量的下边界，1表示包含）
         # ubin = [1 for _ in range(lenV)]  # 决策变量上边界（0表示不包含该变量的上边界，1表示包含）
-        pso = PSO(func=self.aimFunc, n_dim=lenV, pop=20, max_iter=max_iter, lb=lb, ub=ub, w=0.8, c1=0.5, c2=0.5,
-                  constraint_ueq=(self.checkTimeOpT,))
-        pso.run()
-        decisionMatResult, _ = geatVars2mat(pso.best_x, self.taskTimeMats)
+        ia = IA_TSP(func=self.aimFunc, n_dim=lenV, size_pop=40, max_iter=max_iter)
+        ia.run()
+        decisionMatResult, _ = geatVars2mat(ia.best_x, self.taskTimeMats)
         # print(decisionMatResult)
         return decisionMatResult
         # plt.plot(pso.gbest_y_hist)
         # plt.show()
 
 
-def psoResolve_class_resource(taskTimeMats, tasksDataMats, decisionMat, ResourceMats, CarInfos,
-                              MECInfo, B):
+def iaResolve_class_resource(taskTimeMats, tasksDataMats, decisionMat, ResourceMats, CarInfos,
+                             MECInfo, B):
     problem = MyProblem(taskTimeMats, tasksDataMats, decisionMat, ResourceMats, CarInfos, MECInfo, B)
     return problem.solve()

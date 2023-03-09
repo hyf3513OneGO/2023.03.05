@@ -64,6 +64,5 @@ def gaResolve_class_resource(taskTimeMats, tasksDataMats, decisionMat, ResourceM
     # 求解
     res = ea.optimize(algorithm, seed=1, verbose=False, drawing=0, outputMsg=False, drawLog=False, saveFlag=False,
                       dirName='result')
-    print(res['Vars'])
     decisionMatResult,_ = geatVars2mat(np.squeeze(res['Vars']), taskTimeMats)
     return decisionMatResult

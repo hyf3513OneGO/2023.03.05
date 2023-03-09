@@ -68,7 +68,10 @@ def getRandomDAGMat(node: int, edge: int) -> np.array:
 
 def getRandomDataMat(timeTasksMat: np.array, low: int, high: int) -> np.array:
     datasMat = timeTasksMat.copy()
-    datasMat[datasMat != 0] = random.randint(low, high)
+    nonzeroIndex=np.argwhere(datasMat!=0)
+    for item in nonzeroIndex:
+        datasMat[item[0]][item[1]][item[2]]=random.randint(low, high)
+    # print(datasMat)
     return datasMat
 
 
